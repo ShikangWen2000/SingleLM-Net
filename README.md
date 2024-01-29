@@ -40,7 +40,11 @@ The Reconstruction-Net is utilized to generate a high dynamic range (HDR) image,
 
 ## Luminance map dataset
 
-This part is cooming soon...
+Our collected dataset had been validated by a independent illuminance meter using vertical illuminance (E_V) metric. The E_V from the HDR method is close with the E_V from the independent illuminance meter. The dataset link is coming soon...
+
+<p align="center">
+<img src="./Figures/Comparedwithmeter.png"  alt="" align=center />
+</p>
 
 ## Usage 
 
