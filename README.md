@@ -20,7 +20,6 @@ Our work achieves the state-of-the-art in restoring luminance map.
 | HDRUNet [49] | 58.72/9.94      | 0.8681       | 0.9112       |
 | SingleLDR [13] | 54.82/14.27   | 0.2000       | 0.2724       |
 | Ours         | 59.24/11.97    | 0.9054       | 0.9243       |
-|
 
 
 ## Architecture
