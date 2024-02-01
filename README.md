@@ -18,7 +18,7 @@ Our work achieves the state-of-the-art in restoring luminance maps.
 | Expandnet | 53.52/11.64   | 0.2563       | 0.3585       |
 | HDRUNet | 58.72/9.94      | 0.8681       | 0.9112       |
 | SingleLDR | 54.82/14.27   | 0.2000       | 0.2724       |
-| Ours    | 59.24/11.97    | 0.9054       | 0.9243       |
+|**Ours**    | **59.24/11.97**    | **0.9054**       | **0.9243**       |
 
 
 ## Architecture
