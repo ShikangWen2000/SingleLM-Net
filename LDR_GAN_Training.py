@@ -34,7 +34,7 @@ parser.add_argument('--act', help='activation', default='leak_relu', choices=['s
 parser.add_argument('--ckpt', type=str, default = '', help='the ckpt file')
 parser.add_argument('--vgg_ratio', type=float, default=0.001)
 parser.add_argument('--ckpt_vgg', type=str, default = 'VGG_ckpt/vgg16.npy', help='the ckpt_vgg file')
-parser.add_argument('--vgg', type=str, default=False, help='the ckpt_vgg file')
+parser.add_argument('--vgg', type=str, default=False, help='Using vgg or not')
 # Data settings and save path
 parser.add_argument('--dataroot', type=str, default='', help='path to training data')
 parser.add_argument("--Validation", type=str, default = False, help="False or True")

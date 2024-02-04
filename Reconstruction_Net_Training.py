@@ -17,6 +17,7 @@ parser.add_argument('--batch_size', type=int, default=8)
 parser.add_argument('--epoch', type=int, default=400)
 parser.add_argument('--resize', type=int, default=512)
 parser.add_argument('--learning_rate', type=float, default=0.0001)
+parser.add_argument('--vgg', type=str, default='False', help='Using vgg or not')
 parser.add_argument('--vgg_ratio', type=float, default=0.001)
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--restore', type=str, default=False)
@@ -68,7 +69,7 @@ def build_graph(
         squared_difference = tf.square(refinement_output - hdr)
         loss = tf.reduce_mean(squared_difference, axis=[1, 2, 3], keepdims=True)
     # Add the perceptual loss
-    if args.vgg_ratio != 0:
+    if args.vgg == 'True':
         vgg = Vgg16(args.ckpt_vgg)
         vgg.build(refinement_output)
         vgg2 = Vgg16(args.ckpt_vgg)
