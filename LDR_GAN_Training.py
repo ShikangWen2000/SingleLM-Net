@@ -183,9 +183,6 @@ def train(args, lambda_l1):
                         # update the best performance score
                         best_performance = performance_score
                         print("end")
-                        rounded_performance_score = round(performance_score, 2)
-                        if rounded_performance_score == 25.21:
-                            break
                 else:
                     if epoch == 0 or epoch % args.model_save_interval == 0:
                         print('start save')
@@ -216,7 +213,7 @@ def train(args, lambda_l1):
                     print("GAN training's G_loss_l1 {}, PSNR {}".format(str(l1_val), str(psnr_val)))
                     train_writer.add_summary(summary, epoch*total_train_images + iter_id)
 
-                    if iter_id % 3000 == 0:
+                    if iter_id % 6000 == 0:
                         """Calculate the index after each epoch"""
                         fake_B = sess.run(generator_image, feed_dict={image_A: batch_A, image_B: batch_B, is_training: False})
                         fake_B = np.array(fake_B)

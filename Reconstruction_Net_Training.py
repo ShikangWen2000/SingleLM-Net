@@ -205,12 +205,12 @@ for epoch in range(start_epoch, args.epoch):
         print("epoch {}, it {}, loss {}".format(str(epoch), str(iter_id), str(loss_val)))
         print("perceptual_loss: {}".format(perceptual_loss_val))
         print("Psnr: {}".format(psnr_val))
-        if iter_id == 0 or iter_id % 3000 == 0:
+        if iter_id == 0 or iter_id % 6000 == 0:
             fake_B = sess.run(refinement_output, feed_dict={image_A: batch_A, image_B: batch_B, is_training: True})
             fake_B = np.array(fake_B)
             range_num = 2 if args.batch_size > 2 else args.batch_size
             for num_img in range(range_num):
-                img1 = fake_B[num_img] * 32768.0
+                img1 = fake_B[num_img] * 32000.0
                 save_path = os.path.join(Image_path, 'epoch{}_step{}_preTrain_{}.hdr'.format(str(epoch), str(iter_id), str(num_img)))
                 cv2.imwrite(save_path, img1)
             summary_writer.add_summary(summary_val, it)

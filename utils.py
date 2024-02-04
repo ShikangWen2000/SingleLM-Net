@@ -113,8 +113,6 @@ def get_saved_model_paths(args, checkpoint_file):
     saved_model_paths = []
     #if win
     if args.system == 'win':
-        
-
         with open(checkpoint_file, 'r') as file:
             lines = file.readlines()
             for line in lines:

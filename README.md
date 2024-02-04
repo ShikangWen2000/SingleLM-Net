@@ -52,7 +52,7 @@ The Reconstruction-Net is utilized to generate a high dynamic range (HDR) image,
     - [Configuration](#configuration)
     - [How to test](#how-to-test)
     - [How to train](#how-to-train)
-    - [How to Assess](#how-to-assess)
+    - [How to assess](#how-to-assess)
     - [Acknowledgment](#acknowledgment)
 
 ### Dataset
@@ -98,7 +98,7 @@ python LDR_GAN_Training.py --dataroot "your training dataroot" --batch_size 8 --
 python Reconstruction_Net_Training.py --mode Train --dataroot "Your dataset path" --learning_rate 0.0001 --restore_gan True --ldr_gan_ckpt "LDR-GAN Pretrained model path" --vgg True --ckpt_vgg "your vgg pretrained model path" --Validation True --Validation_path "your validation dataroot" --model_name model_name
 ```
 
-### How to Assess
+### How to assess
 
 To assess the model performance, calculate glare information, SSIM, and PSNR values. Ensure you have installed the Radiance and relevant packages before calculating the glare metric.
 
