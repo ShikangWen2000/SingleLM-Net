@@ -71,7 +71,7 @@ conda create --name singleLM --file SingleLM-Net.txt
 
 ### How to test
 
-- Modify args with the `dataroot` and `pretrain_model` (you can also use the pretrained model provided in the [pretrained model](link)) in the following command, then run
+- Modify args with the `dataroot` and `pretrain_model` (you can also use the pretrained model provided in the [pretrained model](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EU2RYKbbC-pAleOCopcO5w8BV-tmJQ5k4P5emIDBP6Dudg?e=gPA9He)) in the following command, then run
 
 ```bash
 cd SingleLM-Net

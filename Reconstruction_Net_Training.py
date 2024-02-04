@@ -100,7 +100,7 @@ if args.Validation == "True":
     Validation_input_images, Validation_reference_images, Validation_total_images, Validation_iterator, input_filename_save = load_dataset(args, 'Validation')
 
 batch_size = args.batch_size
-b, h, w, c = batch_size, 512, 512, 3
+b, h, w, c = batch_size, args.resize, args.resize, 3
 # TF placeholder for graph input
 image_A = tf.placeholder(tf.float32, [None, h, w, 3])
 image_B = tf.placeholder(tf.float32, [None, h, w, 3])
