@@ -90,7 +90,7 @@ def build_graph(
             epsilon=1e-8, use_locking=False).minimize(all_loss, global_step=global_step, var_list=trainable_vars)
     
     #calculate psnr
-    mse = tf.reduce_mean(tf.square(apply_circle_mask(refinement_output) - hdr))
+    mse = tf.reduce_mean(tf.square(refinement_output - hdr))
     psnr = 20.0 * log10(1.0) - 10.0 * log10(mse)
     tf.summary.scalar('loss', tf.reduce_mean(loss))
     return train_op, tf.reduce_mean(loss), psnr, refinement_output, perceptual_loss
