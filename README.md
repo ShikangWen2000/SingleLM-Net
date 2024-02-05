@@ -64,9 +64,12 @@ The compiled dataset underwent validation using an independent illuminance meter
 </p>
 
 ### Configuration
+To utilize the GPU capabilities of the 30 or 40 series, it is essential to install nvidia-tensorFlow. However, please note that nvidia-tensorFlow is exclusively compatible with Linux operating systems and python 3.8.
 
 ```bash
-conda create --name singleLM --file SingleLM-Net.txt
+conda create --name singleLM python=3.8
+conda activate singleLM
+pip install SingleLM-Net.txt
 ```
 
 ### How to test
@@ -96,6 +99,14 @@ python LDR_GAN_Training.py --dataroot "your training dataroot" --batch_size 8 --
 
 ```bash
 python Reconstruction_Net_Training.py --mode Train --dataroot "Your dataset path" --learning_rate 0.0001 --restore_gan True --ldr_gan_ckpt "LDR-GAN Pretrained model path" --vgg True --ckpt_vgg "your vgg pretrained model path" --Validation True --Validation_path "your validation dataroot" --model_name model_name
+```
+
+- Option 2, Directly training
+Training the SingleLM-Net on the [luminance map dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY).
+
+```bash
+conda activate singleLM
+python Reconstruction_Net_Training.py --mode Train --dataroot "Your dataset path" --learning_rate 0.0001 --restore_gan False  --vgg True --ckpt_vgg "your vgg pretrained model path" --Validation True --Validation_path "your validation dataroot" --model_name model_name
 ```
 
 ### How to assess
