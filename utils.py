@@ -70,17 +70,23 @@ def select_optimizer(opt_name, learning_rate):
 def restore_training(saver, sess, args):
     start_epoch = 0
     if args.restore == "True":
-        ckpt = tf.train.get_checkpoint_state(args.restore_path)  
-        print(ckpt)
-        if ckpt and ckpt.model_checkpoint_path:
-            saver.restore(sess, ckpt.model_checkpoint_path)#restore all variables
-            start_epoch = re.findall(r"\d+\.?\d*", str(ckpt))   #obtain the number of the last epoch
-            #start_epoch = re.findall(r"(?<=-)\d+",ckpt)
-            print(start_epoch)
-            print('the epoch finished last time is ' + start_epoch[-1])  #print the number of the last epoch
-            start_epoch = int(float(start_epoch[-1]))                #keep the number of the last epoch
-            print('Model restored...')
-            start_epoch = start_epoch + 1
+        if args.restore_path.endswith('.ckpt'):
+            saver.restore(sess, args.restore_path)
+            start_epoch = re.findall(r"\d+\.?\d*", str(args.restore_path))
+            print('the epoch finished last time is ' + start_epoch[-1])
+            start_epoch = int(float(start_epoch[-1])) 
+            start_epoch = start_epoch + 1 
+        elif os.path.isdir(args.restore_path):
+            ckpt = tf.train.get_checkpoint_state(args.restore_path)  
+            if ckpt and ckpt.model_checkpoint_path:
+                saver.restore(sess, ckpt.model_checkpoint_path)#restore all variables
+                start_epoch = re.findall(r"\d+\.?\d*", str(ckpt))   #obtain the number of the last epoch
+                #start_epoch = re.findall(r"(?<=-)\d+",ckpt)
+                print(start_epoch)
+                print('the epoch finished last time is ' + start_epoch[-1])  #print the number of the last epoch
+                start_epoch = int(float(start_epoch[-1]))                #keep the number of the last epoch
+                print('Model restored...')
+                start_epoch = start_epoch + 1
         else:
             start_epoch = 0
             print('No model')
@@ -109,33 +115,10 @@ def _metric():
 
     return sheet, workbook2
 
-def get_saved_model_paths(args, checkpoint_file):
-    saved_model_paths = []
-    #if win
-    if args.system == 'win':
-        with open(checkpoint_file, 'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                if line.startswith("model_checkpoint_path"):
-                    continue
-                model_path = line.split(": ")[-1].strip().split('"')[1]
-                
-                # Replace forward slashes with double backslashes
-                model_path = model_path.replace('/', '\\\\')
-                model_path = model_path.replace('\\\\', '\\')
-                saved_model_paths.append(model_path)
-    
-    if args.system == 'linux':
-        with open(checkpoint_file, 'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                if line.startswith("model_checkpoint_path"):
-                    continue
-                elif line.startswith("all_model_checkpoint_paths"):
-                    model_path = line.split(": ")[-1].strip().split('"')[1] + ".ckpt"
-                    saved_model_paths.append(model_path)
-
-    return saved_model_paths
+def get_saved_model_paths(checkpoints):
+        ckpt = tf.train.get_checkpoint_state(checkpoints)
+        saved_model_paths = ckpt.all_model_checkpoint_paths
+        return saved_model_paths
 
 def save_training_image(fake_B, batch_B, max_val, sheet, index_position, workbook2, output_xls, iter_id, batch_size):
     _psnr, _ssim, _mse, flag = 0 ,0, 0, 0

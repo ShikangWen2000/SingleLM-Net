@@ -8,33 +8,31 @@ from refinement_net import Refinement_net
 from Data.Data_load_weight_finetune import load_dataset
 from Data.Metrics import *
 from Mask.Circle_Mask import apply_circle_mask
-from utils import Test_auto_mkdir, log10, save_results, _metric
+from utils import Test_auto_mkdir, log10, save_results, _metric, get_saved_model_paths
 # ---
 parser = argparse.ArgumentParser()
 # Test settings
 parser.add_argument('--batch_size', type=int, default=1)
 parser.add_argument('--resize', type=int, default=512)
 parser.add_argument('--ngf', type=int, default=64)
-parser.add_argument("--mode", dest='mode', default='Validation', type = str, help = "Validation or Train")
 parser.add_argument('--gan', dest='gan', default='wgan_gp', choices=['sphere', 'wgan_gp', 'pgan', 'gan'])
 parser.add_argument('--dis_norm_type', help='normalization', default='sn', choices=['in', 'ln', 'nn', 'wn', 'sn'])
 parser.add_argument('--gen_norm_type', help='normalization', default='sn', choices=['in', 'ln', 'nn', 'wn', 'sn', 'bn'])
 parser.add_argument('--num_layers', default=3, choices=(2, 3, 4, 5), type=int)
 parser.add_argument('--act', help='activation', default='leak_relu', choices=['swish','leak_relu', 'relu'])
 parser.add_argument('--two_stage_network', type=str, default='Unet', help='two stage network')
-parser.add_argument('--system', default='win', choices=['win', 'linux'])
+parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for GPU')
 # Data settings and save path
 parser.add_argument('--logdir_path', type=str, default = 'Test_output')
-parser.add_argument('--model_name', type=str, required=True)
-parser.add_argument("--test", type=str, default=False, help="False or True")
+parser.add_argument('--model_name', type=str, required=True, default = 'model_name')
 parser.add_argument('--Validation_path', type=str, default ='', help='validation dataset path')
-parser.add_argument('--Checkpoint_path', type=str, default='', help='path to pretrained ckpt')
-parser.add_argument("--save_hdr", type=str, default = False, help=" save_hdr False or True")
+parser.add_argument('--Checkpoint_path', type=str, default='', help='path to pretrained ckpt or ckptpoints direction')
+parser.add_argument("--save_hdr", type=str, default = "False", help=" save hdr False or True")
 # Mask settings
-parser.add_argument('--mask', type=str, default =False, help = 'use the mask')
-parser.add_argument("--input_mask", type=str, default =False, help="False or True")
-parser.add_argument("--output_mask", type=str, default =False, help="False or True")
-parser.add_argument("--final_output_mask", type=str, default=False, help="False or True")
+parser.add_argument('--mask', type=str, default = "False", help = 'use the mask')
+parser.add_argument("--input_mask", type=str, default = "False", help="False or True")
+parser.add_argument("--output_mask", type=str, default = "False", help="False or True")
+parser.add_argument("--final_output_mask", type=str, default= "False", help="False or True")
 
 args = parser.parse_args()
 
@@ -70,43 +68,15 @@ hdr = tf.placeholder(tf.float32, [None, h, w, c])
 is_training = tf.placeholder(tf.bool)
 
 HDR_out, _psnr, _mse = build_graph(ldr, hdr, is_training)
-
-
 class Tester:
     def __init__(self):
         return
-    def get_saved_model_paths(self, checkpoint_file):
-        saved_model_paths = []
-        #if win
-        if args.system == 'win':
-            with open(checkpoint_file, 'r') as file:
-                lines = file.readlines()
-                for line in lines:
-                    if line.startswith("model_checkpoint_path"):
-                        continue
-                    model_path = line.split(": ")[-1].strip().split('"')[1]
-                    # Replace forward slashes with double backslashes
-                    model_path = model_path.replace('/', '\\\\')
-                    model_path = model_path.replace('\\\\', '\\')
-                    saved_model_paths.append(model_path)
-        elif args.system == 'linux':
-            with open(checkpoint_file, 'r') as file:
-                lines = file.readlines()
-                for line in lines:
-                    if line.startswith("model_checkpoint_path"):
-                        continue
-                    elif line.startswith("all_model_checkpoint_paths"):
-                        model_path = line.split(": ")[-1].strip().split('"')[1] + ".ckpt"
-                        saved_model_paths.append(model_path)
-
-        return saved_model_paths
-    
     def test_it(self):
         # To continue training from one of the checkpoints
         if args.Checkpoint_path.endswith('.ckpt'):
             model_checkpoints = [args.Checkpoint_path]
         else:
-            model_checkpoints = self.get_saved_model_paths(args.Checkpoint_path)
+            model_checkpoints = get_saved_model_paths(args.Checkpoint_path)
         best_score = float('-inf')
         # initialize the results list
         results = []
@@ -197,7 +167,12 @@ class Tester:
         print("Best score:", best_score)
         print("Best model:", best_params)
 
-sess = tf.Session()
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+config.allow_soft_placement = True
+# Specify the GPU device you want to use. Use device number, e.g., "0" for the first GPU.
+config.gpu_options.visible_device_list = args.gpu_ids
+sess = tf.Session(config=config)
 restorer = tf.train.Saver()
 tester = Tester()
 tester.test_it()

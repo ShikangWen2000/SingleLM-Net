@@ -2,9 +2,6 @@ import os
 import cv2
 import numpy as np 
 import argparse
-import xlwt
-import random
-import json
 import tensorflow as tf
 from SingleLuminance_network import SingleLuminance_network
 from Data.Metrics import *
@@ -15,7 +12,6 @@ curr_path = os.getcwd()
 
 parser = argparse.ArgumentParser()
 # Test settings
-parser.add_argument("--mode", dest='mode', type = str, help = "specify the mode of the network", default = "Test")
 parser.add_argument('--batch_size', type=int, default = 1, help='gen and disc batch size')
 parser.add_argument('--resize', type=int, default=512)
 parser.add_argument('--ngf', type=int, default=64)
@@ -28,18 +24,16 @@ parser.add_argument('--gen_norm_type', help='normalization', default='sn', choic
 parser.add_argument('--num_layers', default=3, choices=(2, 3, 4, 5), type=int)
 parser.add_argument('--act', help='activation', default='leak_relu', choices=['swish','leak_relu', 'relu'])
 # Data settings and save path
-parser.add_argument("--save_hdr", type=str, default = False, help="False or True")
-parser.add_argument("--test", type=str, default=False, help="False or True")
-parser.add_argument('--system', default='win', choices=['win', 'linux'])
-parser.add_argument('--test_path', type=str, default = 'validation', help='path to test data')
+parser.add_argument("--save_hdr", type=str, default = "False", help="Save hdr False or True")
+parser.add_argument('--Validation_path', type=str, default = 'validation', help='path to test data')
 parser.add_argument('--logdir_path', type=str, default='LDR_Test_output', help='path of logs')
-parser.add_argument('--model_name', type=str, default='auto', help='folder name to save weights')
-parser.add_argument('--Checkpoint_path', type=str, default='', help='path to pretrained model')
+parser.add_argument('--model_name', type=str, default='model_name', help='folder name to save weights')
+parser.add_argument('--Checkpoint_path', type=str, default='', help='path to pretrained model or ckptpoints')
 # Mask settings
-parser.add_argument('--mask', type=str, default = False, help = 'use the mask')
-parser.add_argument("--input_mask", type=str, default=False, help="False or True")
-parser.add_argument("--output_mask", type=str, default=False, help="False or True")
-parser.add_argument("--final_output_mask", type=str, default=False, help="False or True")
+parser.add_argument('--mask', type=str, default = "False", help = 'use the mask')
+parser.add_argument("--input_mask", type=str, default="False", help="False or True")
+parser.add_argument("--output_mask", type=str, default="False", help="False or True")
+parser.add_argument("--final_output_mask", type=str, default="False", help="False or True")
 args = parser.parse_args()
 
 def build_graph(
@@ -50,6 +44,7 @@ def build_graph(
     model = SingleLuminance_network(ldr, hdr, args.batch_size, is_training, args)
     # Loss
     D_loss, G_loss, generator_image = model.compute_loss()
+    hdr = apply_circle_mask(hdr)
     if args.final_output_mask == "True":
         generator_image = apply_circle_mask(generator_image)
     mse = tf.reduce_mean(tf.square(generator_image  - hdr))
@@ -63,10 +58,8 @@ def test(args):
     max_val = 255.0
     ######### Prep for training
     # Path for tf.summary.FileWriter and to store model checkpoints
-    output_path, filewriter_path, Image_path, json_path = Test_auto_mkdir(args)
+    output_path, filewriter_path, Image_path, json_path = Test_auto_mkdir(args, curr_path)
     """evaluation metrics output"""
-    metric_name = 'evaluation_metrics.xls'
-    output_xls = os.path.join(filewriter_path, metric_name)
     index_position = 0
     sheet, workbook2 = _metric()
     # TF placeholder for graph input
@@ -78,7 +71,7 @@ def test(args):
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
     # Specify the GPU device you want to use. Use device number, e.g., "0" for the first GPU.
-    config.gpu_options.visible_device_list = "0"
+    config.gpu_options.visible_device_list = args.gpu_ids
     # Create a TensorFlow session with the modified configuration.
     generator_image, psnr= build_graph(image_A, image_B, is_training)
     
@@ -93,13 +86,14 @@ def test(args):
             if args.Checkpoint_path.endswith('.ckpt'):
                 model_checkpoints = [args.Checkpoint_path]
             else:
-                model_checkpoints = get_saved_model_paths(args, args.Checkpoint_path)
+                model_checkpoints = get_saved_model_paths(args.Checkpoint_path)
             
             best_score = float('-inf')
             # 初始化一个列表用于保存所有参数和分数
             results = []
             results_filename_path = json_path
             #start test
+            print("start test...")
             for model_checkpoint in model_checkpoints:
                 print(model_checkpoint)
                 saver.restore(sess, model_checkpoint)
@@ -113,6 +107,7 @@ def test(args):
                 mse = 0
                 num_batches = test_total_images // batch_size
                 for test_iter in range(num_batches):
+                    
                     test_batch_A, test_batch_B, filename = sess.run([test_input_images, test_reference_images, input_filenames])
                     #test_batch_A, test_batch_B= sess.run([test_input_images, test_reference_images])
                     test_psnr_val, generator_image_val = sess.run([psnr, generator_image], feed_dict={image_A: test_batch_A.astype('float32'), image_B: test_batch_B.astype('float32'), is_training: False})
@@ -120,6 +115,7 @@ def test(args):
                     index_position += 1
                     sheet.write(index_position, 0, 'Gan' + str(step))
                     fake_B = np.array(generator_image_val) * 255.0
+                    print("{} / {} :Normlization PSNR: {}".format(test_iter, num_batches, test_psnr_val))
                     if args.save_hdr == "True":
                         print("Normlization PSNR: {}".format(test_psnr_val))
                         for num_img in range(args.batch_size):                            
@@ -162,9 +158,8 @@ def test(args):
             return best_score
 
 def main(args):
-    if args.mode == 'Test':
-        psnr_score = test(args)
-        print("The best PSNR score is: ", psnr_score)
+    psnr_score = test(args)
+    print("The best PSNR score is: ", psnr_score)
 
 if __name__ == '__main__':
     main(args)

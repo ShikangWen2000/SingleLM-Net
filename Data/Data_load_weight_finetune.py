@@ -15,6 +15,7 @@ def _read_hdr_image(hdr_path, _image_size_=512, mode = "train"):
     hdr_image = np.float32(hdr_image) / 32000.0
     return hdr_image
 
+
 def _read_ldr_image(ldr_path, _image_size_=512, mode = "train"):
     image_size = (int(_image_size_), int(_image_size_))
     ldr_path = ldr_path.decode("utf-8")

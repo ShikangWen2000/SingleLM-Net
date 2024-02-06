@@ -16,9 +16,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--num_epochs", dest='num_epochs', type=int, default=400, help="specify number of epochs")
 parser.add_argument("--D_lr", type=float, default=0.00001, help="specify learning rate")
 parser.add_argument("--G_lr", type=float, default=0.00001, help="specify learning rate")
-parser.add_argument("--restore", dest='restore', type=str, default=False, help="False or True")
-parser.add_argument("--restore_path", default='', type=str, help="specify the ckpt file")
-parser.add_argument("--mode", dest='mode', type=str, default="Train", help="specify the checkpoint")
+parser.add_argument("--restore", default='', type=str,  help="False or True")
+parser.add_argument("--restore_path", default='', type=str, help="specify the ckpt folder")
 parser.add_argument('--batch_size', type=int, default = 8, help='gen and disc batch size')
 parser.add_argument('--resize', type=int, default=512)
 parser.add_argument('--ngf', type=int, default=64)
@@ -31,21 +30,20 @@ parser.add_argument('--dis_norm_type', help='normalization', default='sn', choic
 parser.add_argument('--gen_norm_type', help='normalization', default='sn', choices=['in', 'ln', 'nn', 'wn', 'sn'])
 parser.add_argument('--num_layers', default=3, choices=(2, 3, 4, 5), type=int)
 parser.add_argument('--act', help='activation', default='leak_relu', choices=['swish','leak_relu', 'relu'])
-parser.add_argument('--ckpt', type=str, default = '', help='the ckpt file')
 parser.add_argument('--vgg_ratio', type=float, default=0.001)
 parser.add_argument('--ckpt_vgg', type=str, default = 'VGG_ckpt/vgg16.npy', help='the ckpt_vgg file')
-parser.add_argument('--vgg', type=str, default=False, help='Using vgg or not')
+parser.add_argument('--vgg', type=str, default="False", help='the ckpt_vgg file')
 # Data settings and save path
 parser.add_argument('--dataroot', type=str, default='', help='path to training data')
-parser.add_argument("--Validation", type=str, default = False, help="False or True")
+parser.add_argument("--Validation", type=str, default = "False", help="False or True")
 parser.add_argument('--Validation_path', type=str, default='validation', help='path to Validation dataset')
 parser.add_argument('--logdir_path', type=str, default='LDR_Training_output', help='path of logs')
 parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for GPU')
 parser.add_argument('--model_name', type=str, default='auto', help='folder name to save weights')
 # Mask settings
-parser.add_argument("--input_mask", type=str, default = True, help="False or True")
-parser.add_argument("--output_mask", type=str, default = True, help="False or True")
-parser.add_argument('--mask', type=str, default = False, help = 'use the mask')
+parser.add_argument("--input_mask", type=str, default = "False", help="False or True")
+parser.add_argument("--output_mask", type=str, default = "False", help="False or True")
+parser.add_argument('--mask', type=str, default = "False", help = 'use the mask')
 parser.add_argument("--final_output_mask", type=str, default="False", help="False or True")
 args = parser.parse_args()
 
@@ -81,11 +79,7 @@ def build_graph(
     G_loss = G_loss_GAN + loss
     D_vars = [v for v in tf.trainable_variables() if v.name.startswith("dis_")]
     G_vars = [v for v in tf.trainable_variables() if v.name.startswith("gen_")]
-    global_step = tf.Variable(0, trainable=False, name='global_step')
-    initial_learning_rate = args.D_lr
-    decay_steps = 100000
-    decay_rate = 0.99
-    learning_rate = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, decay_rate, staircase=True)
+    learning_rate = args.D_lr
     D_optimizer = select_optimizer(args.OPT, learning_rate)
     G_optimizer = select_optimizer(args.OPT, learning_rate)
     with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
@@ -152,18 +146,18 @@ def train(args, lambda_l1):
                 # Validation network
                 print("GAN training epcoh {} begins: ".format(str(epoch)))
                 # After each epoch, calculate the PSNR on the Validation set
+                
                 if args.Validation == "True":
                     if epoch % 1 == 0:
                         # 初始化测试集迭代器
                         sess.run(Validation_iterator.initializer)
                         # 在测试集上计算性能指标，例如PSNR
                         performance_score = 0
-                        num_batches = Validation_total_images // batch_size
+                        num_batches = Validation_total_images
                         for Validation_iter in range(num_batches):
                             Validation_batch_A, Validation_batch_B = sess.run([Validation_input_images, Validation_reference_images])
                             Validation_psnr_val = sess.run(psnr, feed_dict={image_A: Validation_batch_A.astype('float32'), image_B: Validation_batch_B.astype('float32'), is_training: False})
                             performance_score += Validation_psnr_val
-                        
                         psnr_score = performance_score / num_batches
                         print("PSNR on Validation dataset: {}".format(psnr_score))
                         results.append({
@@ -193,7 +187,6 @@ def train(args, lambda_l1):
                         print('finish save')
                     
                 for iter_id in np.arange(0, total_train_images - batch_size, batch_size):
-
                     # Get a batch of images (paired)                
                     step += 1
                     batch_A, batch_B = sess.run([input_images, reference_images])
@@ -226,10 +219,9 @@ def train(args, lambda_l1):
             return best_performance
 
 def main(args):
-    if args.mode == 'Train':
-        lambda_l1 = 1.0
-        psnr_score = train(args, lambda_l1)
-        print('PSNR on Validation dataset: {}'.format(psnr_score))
+    lambda_l1 = 100.0
+    psnr_score = train(args, lambda_l1)
+    print('PSNR on Validation dataset: {}'.format(psnr_score))
         
 if __name__ == '__main__':
     main(args)

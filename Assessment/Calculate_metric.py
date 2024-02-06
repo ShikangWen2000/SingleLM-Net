@@ -145,6 +145,7 @@ def has_view_settings(hdr_path):
     #print(hdr_info)
     # check if the "VIEW=" string is in the header information
     return b"VIEW=" in hdr_info
+
 def process_input_file(file, args):
     pred_hdr_image_path = os.path.join(args.Pred_HDR, file)
     updated_pred_hdr_image_path = update_hdr_file_with_view(pred_hdr_image_path)

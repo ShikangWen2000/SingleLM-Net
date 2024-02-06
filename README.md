@@ -57,7 +57,7 @@ The Reconstruction-Net is utilized to generate a high dynamic range (HDR) image,
 
 ### Dataset
 
-The compiled dataset underwent validation using an independent illuminance meter, employing the vertical illuminance (E_V) metric. The E_V values obtained through the HDR method closely align with those acquired from the independent illuminance meter. You can download the luminance map dataset by following this [link](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY). Before training the Reconstruction-Net, it's essential to first train the LDR-GAN using the [LDR-GAN dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EWFrVCdjk7BEja3-D_MFuPUBAI_NPhf6u6yTykmJt_gY0Q?e=NIEpxj).
+The compiled dataset was validated using an independent illuminance meter, employing the vertical illuminance (E_V) metric. The E_V values obtained through the HDR method closely match those acquired from the independent illuminance meter. You can access the luminance map dataset on [OneDrive](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY) or [Kaggle](https://www.kaggle.com/datasets/shikangwen/luminance-map-dataset). Prior to training the Reconstruction-Net, it is crucial to initially train the LDR-GAN using the LDR-GAN dataset. You can download the dataset on [OneDrive](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EWFrVCdjk7BEja3-D_MFuPUBAI_NPhf6u6yTykmJt_gY0Q?e=NIEpxj) or [Kaggle](https://www.kaggle.com/datasets/shikangwen/ldr-gan-dataset).
 
 <p align="center">
   <img src="./Figures/Comparedwithmeter.png"  alt="" align=center />
@@ -74,12 +74,12 @@ pip install SingleLM-Net.txt
 
 ### How to test
 
-- Modify args with the `dataroot` and `pretrain_model` (you can also use the pretrained model provided in the [pretrained model](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EU2RYKbbC-pAleOCopcO5w8BV-tmJQ5k4P5emIDBP6Dudg?e=gPA9He)) in the following command, then run
+- Modify args with the `dataroot` and `pretrain_model` (you can also use the pre-trained model provided in the [pretrained model](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EU2RYKbbC-pAleOCopcO5w8BV-tmJQ5k4P5emIDBP6Dudg?e=gPA9He)) in the following command, then run
 
 ```bash
 cd SingleLM-Net
 conda activate singleLM
-python Reconstruction_Net_Test.py --test True --Validation_path "Your test dataset path" --Checkpoint_path "Pretrained model path" --save_hdr True --model_name model_name
+python Reconstruction_Net_Test.py --Validation_path "your test dataset" --Checkpoint_path "your pre-trained model" --save_hdr False --two_stage_network Unet --final_output_mask True --model_name model_name
 ```
 
 The test results will be saved to `./Test_output/model_name`.
@@ -92,13 +92,13 @@ The test results will be saved to `./Test_output/model_name`.
   ```bash
   cd SingleLM-Net
   conda activate singleLM
-  python LDR_GAN_Training.py --dataroot "your training dataroot" --batch_size 8 --mode Train --D_lr 0.00001 --G_lr 0.00001 --vgg True --ckpt_vgg "your vgg pretrained model path" --Validation True --Validation_path "your validation dataroot" --model_name model_name
+  python LDR_GAN_Training.py --dataroot "your training dataset" --batch_size 8 --D_lr 0.00001 --G_lr 0.00001 --vgg True --ckpt_vgg "your vgg pre-trained ckpt" --vgg_ratio 0.001  --Validation True --Validation_path "your validation dataset"  --model_name model_name
   ```
 
   - Step 2: Training the Reconstruction-Net on the [luminance map dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY).
 
   ```bash
-  python Reconstruction_Net_Training.py --mode Train --dataroot "Your dataset path" --learning_rate 0.0001 --restore_gan True --ldr_gan_ckpt "LDR-GAN Pretrained model path" --vgg True --ckpt_vgg "your vgg pretrained model path" --Validation True --Validation_path "your validation dataroot" --model_name model_name
+  python Reconstruction_Net_Training.py --batch_size 8 --learning_rate 0.0001 --vgg True --ckpt_vgg "your vgg pre-trained ckpt" --vgg_ratio 0.001 --dataroot "your training dataset" --two_stage_network Unet --Validation True --Validation_path "your validation dataset" --restore_gan True --ckpt_gan "your pre-trained LDR-GAN model" --model_name model_name
   ```
 
 - Option 2, Directly training
@@ -107,12 +107,12 @@ The test results will be saved to `./Test_output/model_name`.
 
   ```bash
   conda activate singleLM
-  python Reconstruction_Net_Training.py --mode Train --dataroot "Your dataset path" --learning_rate 0.0001 --restore_gan False  --vgg True --ckpt_vgg "your vgg pretrained model path" --Validation True --Validation_path "your validation dataroot" --model_name model_name
+  python Reconstruction_Net_Training.py --batch_size 8 --learning_rate 0.0001 --vgg True --ckpt_vgg "your vgg pre-trained ckpt" --vgg_ratio 0.001 --dataroot "your training dataset" --two_stage_network Unet --Validation True --Validation_path "your validation dataset" --restore_gan False --model_name model_name
   ```
 
 ### How to assess
 
-To assess the model performance, calculate glare information, SSIM, and PSNR values. Ensure you have installed the Radiance and relevant packages before calculating the glare metric.
+To assess the model performance, calculate glare information PSNR. Ensure you have installed the `Radiance` and relevant packages before calculating the glare metric.
 
 ```bash
 cd Assessment

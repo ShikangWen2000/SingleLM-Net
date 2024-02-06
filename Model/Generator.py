@@ -14,7 +14,7 @@ class GeneratorModel:
         self.size = args.resize
         self.is_training = is_training
         self.act = tf.nn.swish if args.act == 'swish' else tf.nn.leaky_relu
-        self.mask = apply_circle_mask if args.mask == True else none_mask
+        self.mask = apply_circle_mask if args.mask == "True" else none_mask
         self._init_normalization(args.gen_norm_type)
 
     def _init_normalization(self, norm):
@@ -134,10 +134,7 @@ class GeneratorModel:
             # tanh activation
             
             self.output_layer_activation = self.output_layer
-            if self.args.mode == 'Train':
-                self.generator_output_final = self.mask(self.output_layer_activation)
-            if self.args.mode == 'Validation':
-                self.generator_output_final = self.mask(self.output_layer_activation)
+            self.generator_output_final = self.mask(self.output_layer_activation)
             if self.args.output_mask == 'True':
                 self.generator_output_final = apply_circle_mask(self.output_layer_activation)
             return self.generator_output_final

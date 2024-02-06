@@ -38,7 +38,6 @@ def ssim(img1, img2, data_rang, C1=6.5025, C2=58.5225, window_size=11, sigma=1.5
 
     return ssim
 
-
 def calculate_evaluation(_ldr, _hdr, max_val):
     ssim_vl = ssim(_ldr, _hdr, max_val)
     psnr_vl = psnr(_ldr, _hdr, max_val)

@@ -17,34 +17,32 @@ parser.add_argument('--batch_size', type=int, default=8)
 parser.add_argument('--epoch', type=int, default=400)
 parser.add_argument('--resize', type=int, default=512)
 parser.add_argument('--learning_rate', type=float, default=0.0001)
-parser.add_argument('--vgg', type=str, default='False', help='Using vgg or not')
 parser.add_argument('--vgg_ratio', type=float, default=0.001)
 parser.add_argument('--ngf', type=int, default=64)
 parser.add_argument('--restore', type=str, default=False)
 parser.add_argument('--restore_gan', type=str, default=False)
 parser.add_argument('--restore_path', type=str, default='Refinement_out\Model\checkpoints')
-parser.add_argument("--mode", dest='mode', default='Train', type = str, help = "specify the checkpoint")
 parser.add_argument('--gan', dest='gan', default='wgan_gp', choices=['sphere', 'wgan_gp', 'pgan', 'gan'])
 parser.add_argument('--dis_norm_type', help='normalization', default='sn', choices=['in', 'ln', 'nn', 'wn', 'sn'])
 parser.add_argument('--gen_norm_type', help='normalization', default='sn', choices=['in', 'ln', 'nn', 'wn', 'sn', 'bn'])
 parser.add_argument('--num_layers', default=3, choices=(2, 3, 4, 5), type=int)
 parser.add_argument('--act', help='activation', default='leak_relu', choices=['swish','leak_relu', 'relu'])
-parser.add_argument('--ldr_gan_ckpt', type=str, default = '', help='the ldr-gan ckpt file')
+parser.add_argument('--ckpt_gan', type=str, default = '', help='the gan ckpt file')
 parser.add_argument('--ckpt_vgg', type=str, default = 'VGG_ckpt/vgg16.npy', help='the ckpt_vgg file')
 parser.add_argument('--loss', type=str, default = 'L1', help='loss function')
 parser.add_argument('--two_stage_network', type=str, default='Unet', help='two stage network')
 # Data settings and save path
 parser.add_argument('--logdir_path', type=str, default = 'Refinement_out')
-parser.add_argument('--model_name', type=str, required=True)
-parser.add_argument('--dataroot', type=str, required=True)
+parser.add_argument('--model_name', type=str, required=True, default = 'model_name')
+parser.add_argument('--dataroot', type=str, required=True, help='The training dataroot')
 parser.add_argument('--model_save_interval', type=int, default=2)
-parser.add_argument('--Validation', type=str, default = False, help='Validation or not')
+parser.add_argument('--Validation', type=str, default = "False", help='Validation or not')
 parser.add_argument('--Validation_path', type=str, default = '', help='validation path')
 # Mask settings
-parser.add_argument('--mask', type=str, default = False, help = 'use the mask')
-parser.add_argument("--input_mask", type=str, default = False, help="False or True")
-parser.add_argument("--output_mask", type=str, default = False, help="False or True")
-parser.add_argument("--final_output_mask", type=str, default=False, help="False or True")
+parser.add_argument('--mask', type=str, default = "False", help = 'use the mask')
+parser.add_argument("--input_mask", type=str, default = "False", help="False or True")
+parser.add_argument("--output_mask", type=str, default = "False", help="False or True")
+parser.add_argument("--final_output_mask", type=str, default = "False", help="False or True")
 args = parser.parse_args()
 curr_path = os.getcwd()
 def build_graph(
@@ -69,7 +67,7 @@ def build_graph(
         squared_difference = tf.square(refinement_output - hdr)
         loss = tf.reduce_mean(squared_difference, axis=[1, 2, 3], keepdims=True)
     # Add the perceptual loss
-    if args.vgg == 'True':
+    if args.vgg_ratio != 0:
         vgg = Vgg16(args.ckpt_vgg)
         vgg.build(refinement_output)
         vgg2 = Vgg16(args.ckpt_vgg)
@@ -82,16 +80,13 @@ def build_graph(
         perceptual_loss = tf.constant(0)
         all_loss = tf.reduce_mean((loss))
 
-    initial_learning_rate = args.learning_rate
-    decay_steps = 100000
-    decay_rate = 0.99
-    learning_rate = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, decay_rate, staircase=True)
+    learning_rate = args.learning_rate
     trainable_vars = tf.trainable_variables()
     train_op = tf.train.AdamOptimizer(learning_rate, beta1=0.9, beta2=0.999,
             epsilon=1e-8, use_locking=False).minimize(all_loss, global_step=global_step, var_list=trainable_vars)
     
     #calculate psnr
-    mse = tf.reduce_mean(tf.square(refinement_output - hdr))
+    mse = tf.reduce_mean(tf.square(apply_circle_mask(refinement_output) - hdr))
     psnr = 20.0 * log10(1.0) - 10.0 * log10(mse)
     tf.summary.scalar('loss', tf.reduce_mean(loss))
     return train_op, tf.reduce_mean(loss), psnr, refinement_output, perceptual_loss
@@ -101,7 +96,7 @@ if args.Validation == "True":
     Validation_input_images, Validation_reference_images, Validation_total_images, Validation_iterator, input_filename_save = load_dataset(args, 'Validation')
 
 batch_size = args.batch_size
-b, h, w, c = batch_size, args.resize, args.resize, 3
+b, h, w, c = batch_size, 512, 512, 3
 # TF placeholder for graph input
 image_A = tf.placeholder(tf.float32, [None, h, w, 3])
 image_B = tf.placeholder(tf.float32, [None, h, w, 3])
@@ -140,7 +135,7 @@ if args.restore_gan == 'True':
     restorer1 = tf.train.Saver(
         #var_list=[var for var in tf.get_collection(tf.GraphKeys.VARIABLES) if 'gen_' in var.name or 'dis_' in var.name])
         var_list=[var for var in tf.get_collection(tf.GraphKeys.VARIABLES) if 'gen_' in var.name])
-    restorer1.restore(sess, args.ldr_gan_ckpt)
+    restorer1.restore(sess, args.ckpt_gan)
 
 summary = tf.summary.merge_all()
 summary_writer = tf.summary.FileWriter(
@@ -150,8 +145,7 @@ summary_writer = tf.summary.FileWriter(
 
 # To continue training from one of the checkpoints
 start_epoch = 0
-if args.restore == 'True':
-    start_epoch = restore_training(saver, sess, args)
+start_epoch = restore_training(saver, sess, args)
 
 best_performance = float('-inf')
 # initialize the results list
@@ -206,12 +200,12 @@ for epoch in range(start_epoch, args.epoch):
         print("epoch {}, it {}, loss {}".format(str(epoch), str(iter_id), str(loss_val)))
         print("perceptual_loss: {}".format(perceptual_loss_val))
         print("Psnr: {}".format(psnr_val))
-        if iter_id == 0 or iter_id % 6000 == 0:
+        if iter_id % 6000 == 0:
             fake_B = sess.run(refinement_output, feed_dict={image_A: batch_A, image_B: batch_B, is_training: True})
             fake_B = np.array(fake_B)
             range_num = 2 if args.batch_size > 2 else args.batch_size
             for num_img in range(range_num):
-                img1 = fake_B[num_img] * 32000.0
+                img1 = fake_B[num_img] * 32768.0
                 save_path = os.path.join(Image_path, 'epoch{}_step{}_preTrain_{}.hdr'.format(str(epoch), str(iter_id), str(num_img)))
                 cv2.imwrite(save_path, img1)
             summary_writer.add_summary(summary_val, it)

@@ -22,9 +22,10 @@ def _parse_function(input_filename, reference_filename, _image_size):
 def load_dataset(args, mode_type = "train"):
     if mode_type == "train":
         dataset_path = args.dataroot
+        batch_size = args.batch_size
     elif mode_type == 'Validation':
         dataset_path = args.Validation_path
-    batch_size = args.batch_size
+        batch_size = 1
     input_path = os.path.join(dataset_path, "Input", "*.JPG")
     reference_path = os.path.join(dataset_path, "Reference", "*.JPG")
 
