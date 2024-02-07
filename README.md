@@ -4,7 +4,7 @@ This repository serves as the official implementation for [Reconstructing fishey
 
 ## Introduction
 
-Implementing passive daylighting strategies is hindered by glare. While the high dynamic range (HDR) method aids in real-time glare control, its processing time and complexity are limiting. Therefore, we propose a two-step network using Generative Adversarial Networks (GANs) and a Reconstruction-Net to transform a single low dynamic range (LDR) image into a comprehensive fisheye luminance map.
+Implementing passive daylighting strategies is hindered by glare. While the high dynamic range (HDR) method aids in real-time glare control, its processing time and complexity are limited. Therefore, we propose a two-step network using Generative Adversarial Networks (GANs) and a Reconstruction-Net to transform a single low dynamic range (LDR) image into a comprehensive fisheye luminance map.
 
 <p align="center">
   <img src="./Figures/model.png"  alt="" align=center />
