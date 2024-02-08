@@ -149,9 +149,7 @@ def train(args, lambda_l1):
                 
                 if args.Validation == "True":
                     if epoch % 1 == 0:
-                        # 初始化测试集迭代器
                         sess.run(Validation_iterator.initializer)
-                        # 在测试集上计算性能指标，例如PSNR
                         performance_score = 0
                         num_batches = Validation_total_images
                         for Validation_iter in range(num_batches):
