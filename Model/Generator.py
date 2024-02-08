@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-from model.Normalization import *
-from model._conv import *
+from Model.Normalization import *
+from Model._conv import *
 from Mask.Circle_Mask import apply_circle_mask, none_mask
 
 class GeneratorModel:
