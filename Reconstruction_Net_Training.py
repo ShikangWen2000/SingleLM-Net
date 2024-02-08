@@ -4,8 +4,8 @@ import os
 import numpy as np
 import cv2
 import glob
-from model.Generator import GeneratorModel
-from model.VGG import Vgg16
+from Model.Generator import GeneratorModel
+from Model.VGG import Vgg16
 from refinement_net import Refinement_net
 from Data.Data_load_weight_finetune import load_dataset
 from Mask.Circle_Mask import apply_circle_mask

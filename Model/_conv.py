@@ -1,5 +1,5 @@
 import tensorflow as tf
-from model.Normalization import *
+from Model.Normalization import *
 
 
 def conv2d(input_tensor, num_outputs, kernel_size, strides, padding, name, use_bias=True):

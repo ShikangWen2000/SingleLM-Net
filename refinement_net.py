@@ -1,5 +1,5 @@
 import tensorflow as tf
-from model._conv import *
+from Model._conv import *
 layer_number = 8
 class Refinement_net(object):
     def __init__(self, is_train=True):

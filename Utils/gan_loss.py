@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from tensorkit.model import BaseModel
+from Utils.model import BaseModel
 #from pix2pixHD_network_3_our_model import pix2pixHD_network
 
 def gan_qp(real, fake, discriminator: BaseModel, reuse=None):

@@ -6,7 +6,7 @@ import tensorflow as tf
 from SingleLuminance_network import SingleLuminance_network
 import argparse
 from Data.Data_load_weight import load_dataset
-from model.VGG import Vgg16
+from Model.VGG import Vgg16
 from Mask.Circle_Mask import apply_circle_mask
 from utils import select_optimizer, auto_mkdir, restore_training, log10, save_results
 curr_path = os.getcwd()

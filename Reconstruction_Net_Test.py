@@ -3,7 +3,7 @@ import os
 import tensorflow as tf
 import numpy as np
 import cv2
-from model.Generator import GeneratorModel
+from Model.Generator import GeneratorModel
 from refinement_net import Refinement_net
 from Data.Data_load_weight_finetune import load_dataset
 from Data.Metrics import *

@@ -5,8 +5,8 @@ from Loss.Loss_function import gan_loss
 from Loss.Loss_function import wgan_gp_loss
 from Loss.Loss_function import pgan_loss
 from Loss.Loss_function import sphere as sphere_gan
-from model.Discriminator import PatchDiscriminator
-from model.Generator import GeneratorModel
+from Model.Discriminator import PatchDiscriminator
+from Model.Generator import GeneratorModel
 
 
 class SingleLuminance_network(object):

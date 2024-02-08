@@ -1,6 +1,6 @@
 import tensorflow as tf
-from model._conv import *
-from model.Normalization import *
+from Model._conv import *
+from Model.Normalization import *
 
 class PatchDiscriminator():
     """
