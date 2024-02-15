@@ -21,7 +21,16 @@ def _read_ldr_image(ldr_path, _image_size_=512, mode = "train"):
     ldr_path = ldr_path.decode("utf-8")
     #print("Reading HDR image from path:", hdr_path)
     ldr_image = cv2.imread(ldr_path, cv2.IMREAD_UNCHANGED)
-    ldr_image = cv2.resize(ldr_image, image_size)
+    #check the size of the image, if the size is not the same as the input size, resize the image
+    if ldr_image.shape[0] != _image_size_ or ldr_image.shape[1] != _image_size_:
+        ldr_image = cv2.resize(ldr_image, image_size)
+    #save the resized image, with another directory
+    file_name = ldr_path.split('/')[-1]
+    ldr_path = os.path.join('Data', 'Resized', file_name)
+    if not os.path.exists(os.path.dirname(ldr_path)):
+        os.makedirs(os.path.dirname(ldr_path))
+    cv2.imwrite(ldr_path, ldr_image)
+    #ldr_image = cv2.resize(ldr_image, image_size)
     #BGR2RGB
     ldr_image = ldr_image[:, :, [2, 1, 0]]
 

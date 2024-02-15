@@ -116,20 +116,6 @@ coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess, coord=coord)
 sess.run(tf.global_variables_initializer())
 total_parameters = 0
-
-for variable in tf.trainable_variables():
-    if 'Refinement_Net' or 'gen_' in variable.name:
-    # shape is an array of tf.Dimension
-        shape = variable.get_shape()
-        print(shape)
-        print(len(shape))
-        variable_parameters = 1
-        for dim in shape:
-            print(dim)
-            variable_parameters *= dim.value
-        print(variable_parameters)
-        total_parameters += variable_parameters
-print(total_parameters)
 #restore the ckpt in the name space of GAN
 if args.restore_gan == 'True':
     restorer1 = tf.train.Saver(

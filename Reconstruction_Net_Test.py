@@ -168,8 +168,6 @@ class Tester:
         print("Best model:", best_params)
 
 config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-config.allow_soft_placement = True
 # Specify the GPU device you want to use. Use device number, e.g., "0" for the first GPU.
 config.gpu_options.visible_device_list = args.gpu_ids
 sess = tf.Session(config=config)

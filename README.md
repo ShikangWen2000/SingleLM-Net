@@ -57,7 +57,7 @@ The Reconstruction-Net is utilized to generate a high dynamic range (HDR) image,
 
 ### Dataset
 
-The compiled dataset was validated using an independent illuminance meter, employing the vertical illuminance (E_V) metric. The E_V values obtained through the HDR method closely match those acquired from the independent illuminance meter. You can access the luminance map dataset on [OneDrive](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY) or [Kaggle](https://www.kaggle.com/datasets/shikangwen/luminance-map-dataset). Prior to training the Reconstruction-Net, it is crucial to initially train the LDR-GAN using the LDR-GAN dataset. You can download the dataset on [OneDrive](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EWFrVCdjk7BEja3-D_MFuPUBAI_NPhf6u6yTykmJt_gY0Q?e=NIEpxj) or [Kaggle](https://www.kaggle.com/datasets/shikangwen/ldr-gan-dataset).
+The compiled dataset was validated using an independent illuminance meter, employing the vertical illuminance (E_V) metric. The E_V values obtained through the HDR method closely match those acquired from the independent illuminance meter. You can access the luminance map dataset on [OneDrive](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EdTeVZ5LFTlDjNOn3Vk30nQBkMn8yl4MgP6NJZQquk6vUw?e=QI9gfJ) or [Kaggle](https://www.kaggle.com/datasets/shikangwen/luminance-map-dataset). Prior to training the Reconstruction-Net, it is crucial to initially train the LDR-GAN using the LDR-GAN dataset. You can download the dataset on [OneDrive](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EWFrVCdjk7BEja3-D_MFuPUBAI_NPhf6u6yTykmJt_gY0Q?e=NIEpxj) or [Kaggle](https://www.kaggle.com/datasets/shikangwen/ldr-gan-dataset).
 
 <p align="center">
   <img src="./Figures/Comparedwithmeter.png"  alt="" align=center />
@@ -87,7 +87,7 @@ The test results will be saved to `./Test_output/model_name`.
 ### How to train
 
 - Option 1, Two-step training
-  - Step 1: Training the LDR-GAN on the [LDR-GAN dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EWFrVCdjk7BEja3-D_MFuPUBAI_NPhf6u6yTykmJt_gY0Q?e=NIEpxj) or using [our pre-trained model](link). If you want to use the VGG module, please download the [VGG pre-trained ckpt](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EdnoY01gNnhFvf2a5bTqfYQBHb28DuVYo1BxGl3G0q8Vjg?e=dhNyHK) first.
+  - Step 1: Training the LDR-GAN on the [LDR-GAN dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EWFrVCdjk7BEja3-D_MFuPUBAI_NPhf6u6yTykmJt_gY0Q?e=NIEpxj). If you want to use the VGG module, please download the [VGG pre-trained ckpt](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EdnoY01gNnhFvf2a5bTqfYQBHb28DuVYo1BxGl3G0q8Vjg?e=dhNyHK) first.
 
   ```bash
   cd SingleLM-Net
@@ -95,7 +95,7 @@ The test results will be saved to `./Test_output/model_name`.
   python LDR_GAN_Training.py --dataroot "your training dataset" --batch_size 8 --D_lr 0.00001 --G_lr 0.00001 --vgg True --ckpt_vgg "your vgg pre-trained ckpt" --vgg_ratio 0.001  --Validation True --Validation_path "your validation dataset"  --model_name model_name
   ```
 
-  - Step 2: Training the Reconstruction-Net on the [luminance map dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY).
+  - Step 2: Training the Reconstruction-Net on the [luminance map dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EdTeVZ5LFTlDjNOn3Vk30nQBkMn8yl4MgP6NJZQquk6vUw?e=QI9gfJ).
 
   ```bash
   python Reconstruction_Net_Training.py --batch_size 8 --learning_rate 0.0001 --vgg True --ckpt_vgg "your vgg pre-trained ckpt" --vgg_ratio 0.001 --dataroot "your training dataset" --two_stage_network Unet --Validation True --Validation_path "your validation dataset" --restore_gan True --ckpt_gan "your pre-trained LDR-GAN model" --model_name model_name
@@ -103,7 +103,7 @@ The test results will be saved to `./Test_output/model_name`.
 
 - Option 2, Directly training
 
-  Training the SingleLM-Net on the [luminance map dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EfNtqpM0aWJOhCImYkNUEocBjcIP40wRmOqEZbORq6x_NA?e=SMnkEY).
+  Training the SingleLM-Net on the [luminance map dataset](https://sjtueducn-my.sharepoint.com/:u:/g/personal/1063175952_sjtu_edu_cn/EdTeVZ5LFTlDjNOn3Vk30nQBkMn8yl4MgP6NJZQquk6vUw?e=QI9gfJ).
 
   ```bash
   conda activate singleLM

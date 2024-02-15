@@ -32,7 +32,6 @@ parser.add_argument('--num_layers', default=3, choices=(2, 3, 4, 5), type=int)
 parser.add_argument('--act', help='activation', default='leak_relu', choices=['swish','leak_relu', 'relu'])
 parser.add_argument('--vgg_ratio', type=float, default=0.001)
 parser.add_argument('--ckpt_vgg', type=str, default = 'VGG_ckpt/vgg16.npy', help='the ckpt_vgg file')
-parser.add_argument('--vgg', type=str, default="False", help='the ckpt_vgg file')
 # Data settings and save path
 parser.add_argument('--dataroot', type=str, default='', help='path to training data')
 parser.add_argument("--Validation", type=str, default = "False", help="False or True")
@@ -64,7 +63,7 @@ def build_graph(
         generator_image = apply_circle_mask(generator_image)
     #G_loss = G_loss_GAN + lambda_l1 * G_loss_L1 + lambda_underexposed_attention * U_loss + lambda_overexposed_attention * L_loss
     L1_loss = lambda_l1 * tf.reduce_mean(tf.abs(generator_image - hdr), axis=[1, 2, 3], keepdims=True)
-    if args.vgg == 'True':
+    if args.vgg_ratio != 0:
         vgg = Vgg16(args.ckpt_vgg)
         vgg.build(generator_image)
         vgg2 = Vgg16(args.ckpt_vgg)
